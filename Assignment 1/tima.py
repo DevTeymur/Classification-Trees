@@ -180,14 +180,14 @@ def create_random_forest(x, y, n_trees, nmin, minleaf, nfeat):
         trees.append(tree)
     return trees
 
-# _____________________________________________________________________________________________________
-# Part 2
-train_data = pd.read_csv('eclipse-metrics-packages-2.0.csv', sep=';')
-test_data = pd.read_csv('eclipse-metrics-packages-3.0.csv', sep=';')
+# # _____________________________________________________________________________________________________
+# # Part 2
+# train_data = pd.read_csv('eclipse-metrics-packages-2.0.csv', sep=';')
+# test_data = pd.read_csv('eclipse-metrics-packages-3.0.csv', sep=';')
 
-print(train_data.head())
+# print(train_data.head())
 
-exit()
+# exit()
 
 # _____________________________________________________________________________________________________
 # Call of the functions
