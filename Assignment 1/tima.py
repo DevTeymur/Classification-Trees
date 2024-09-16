@@ -3,6 +3,13 @@ import numpy as np
 import random
 import scipy
 
+from sklearn.metrics import precision_score, accuracy_score, recall_score, confusion_matrix
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+
 # Overall steps
 # 1. Check if len is less than nmin -> return leaf node with majority class
 # 2. Randomly select nfeat features then calculate the gini index (threshold)
@@ -29,6 +36,10 @@ def tree_grow(x, y, nmin, minleaf, nfeat):
     # Splitting the data into two groups based on the found best threshold
     left_indices, right_indices = x[:, best_feat] <= best_threshold, x[:, best_feat] > best_threshold
 
+    # Check if either side of the split is empty
+    if np.sum(left_indices) == 0 or np.sum(right_indices) == 0:
+        return {'leaf': True, 'class': majority_class} # If empty, stop growing and return majority class
+    
     # Recursively call tree_grow on the two groups to create the child nodes
     left_child = tree_grow(x[left_indices], y[left_indices], nmin, minleaf, nfeat)
     right_child = tree_grow(x[right_indices], y[right_indices], nmin, minleaf, nfeat)
@@ -101,55 +112,155 @@ def calc_gini_index(y, logs=False):
 
 def find_best_split(x, y, nfeat, logs=False):
     curr_num_features = x.shape[1]
-    # Random selection of nfeat features
     selected_features = random.sample(range(curr_num_features), nfeat)
     print(f'Selected Features: {selected_features}') if logs else None
-    # Calculate the gini index for each feature
+
     best_gini, best_feature, best_threshold = float('inf'), None, None
 
     for feature in selected_features:
-        thresholds = np.unique(x[:, feature]) # All distinct values of the current feature
+        thresholds = np.unique(x[:, feature])
         for threshold in thresholds:
             left_indices, right_indices = x[:, feature] <= threshold, x[:, feature] > threshold
             
-            # Check if there is enough samples in the left and right nodes
             if np.sum(left_indices) == 0 or np.sum(right_indices) == 0:
                 continue
 
-            # Calc of the gini indexes for left and right nodes
             left_gini, right_gini = calc_gini_index(y[left_indices]), calc_gini_index(y[right_indices])
             weighted_gini = (np.sum(left_indices) * left_gini + np.sum(right_indices) * right_gini) / len(y)
 
             if weighted_gini < best_gini:
                 best_gini, best_feature, best_threshold = weighted_gini, feature, threshold
 
-    print(f'Best Gini: {best_gini}, Best Feature: {best_feature}, Best Threshold: {best_threshold}') if logs else None
-    return best_feature, best_threshold
+    # If no valid split found, return None, None
+    if best_feature is None or best_threshold is None:
+        return None, None
+
+    print(f'Best Gini: {round(best_gini, 2)}, Best Feature: {best_feature}, Best Threshold: {best_threshold}') if logs else None
+    return best_feature, int(best_threshold)
 
 
-def calc_metrics():
-    # Accuracy, Precision, Recall
-    pass
 
-def create_confusion_matrix():
-    pass
+def calc_metrics(y_true, y_pred):
+    accuracy = round(accuracy_score(y_true, y_pred), 2)
+    precision = round(precision_score(y_true, y_pred, average='binary'), 2)
+    recall = round(recall_score(y_true, y_pred, average='binary'), 2)
+    
+    print(f'Accuracy = {accuracy}, Precision = {precision}, Recall = {recall}')    
+    return accuracy, precision, recall
 
 
+def create_confusion_matrix(y_true, y_pred, display=False):
+    conf_matrix = confusion_matrix(y_true, y_pred)
+    
+    print("Confusion Matrix:")
+    print(f"{'':<12}{'Predicted 0':<12}{'Predicted 1':<12}")
+    print(f"{'Actual 0':<12}{conf_matrix[0, 0]:<12}{conf_matrix[0, 1]:<12}")
+    print(f"{'Actual 1':<12}{conf_matrix[1, 0]:<12}{conf_matrix[1, 1]:<12}")
+    
+    if display:
+        plt.figure(figsize=(6,4))
+        sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues", cbar=False, 
+                    xticklabels=['Predicted 0', 'Predicted 1'], 
+                    yticklabels=['Actual 0', 'Actual 1'])
+        
+        plt.xlabel('Predicted')
+        plt.ylabel('Actual')
+        plt.title('Confusion Matrix Heatmap')
+        plt.show()
+
+
+def create_random_forest(x, y, n_trees, nmin, minleaf, nfeat):
+    trees = []
+    for _ in range(n_trees):
+        # Generating random indices for the bootstrap sample
+        bootstrap_indices = np.random.choice(range(len(y)), size=len(y), replace=True)
+        x_bootstrap, y_bootstrap = x[bootstrap_indices], y[bootstrap_indices]
+
+        tree = tree_grow(x_bootstrap, y_bootstrap, nmin, minleaf, nfeat)
+        trees.append(tree)
+    return trees
+
+# # _____________________________________________________________________________________________________
+# # Part 2
+# train_data = pd.read_csv('eclipse-metrics-packages-2.0.csv', sep=';')
+# test_data = pd.read_csv('eclipse-metrics-packages-3.0.csv', sep=';')
+
+# print(train_data.head())
+
+# exit()
+
+# _____________________________________________________________________________________________________
 # Call of the functions
+
+# Part 1
+print('Credit data tree and forest construction')
 credit_data = pd.read_csv('credit_data.csv')
-x = credit_data.drop('class', axis=1)
-y = credit_data['class']
+x = credit_data.drop('class', axis=1).values
+y = credit_data['class'].values
+
+
+print('Creating a single tree:')
+result_tree = tree_grow(x, y, 2, 1, 5)
+new_preds = tree_pred(x, result_tree)
+
+# print(result_tree)
+# print(new_preds)
+calc_metrics(y, new_preds)
+create_confusion_matrix(y, new_preds)
+
+print('\nCreating a forest of 5 trees:')
+result_trees = tree_grow_b(x, y, 2, 1, 5, 5)
+new_preds_b = tree_pred_b(x, result_trees)
+
+# print(result_trees)
+# print(new_preds_b)
+calc_metrics(y, new_preds_b)
+create_confusion_matrix(y, new_preds_b)
+
+print('\nCreating a Random Forest of 5 trees:')
+n_trees = 5
+nfeat = 5  # Specify the number of features to consider for each split
+result_rf = create_random_forest(x, y, n_trees, 2, 1, nfeat)
+new_preds_rf = tree_pred_b(x, result_rf)
+calc_metrics(y, new_preds_rf)
+create_confusion_matrix(y, new_preds_rf)
+
+# _____________________________________________________________________________________________________
+# Testing on pima indians dataset
+print("__" * 50)
+print('\nPima Indians dataset tree construction')
+pima_data = pd.read_csv('pima_indians_data.csv', header=None)
+columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'class']
+pima_data.columns = columns
+
+# print(pima_data.head())
+x = pima_data.drop('class', axis=1).values
+y = pima_data['class'].values
 
 # print(x, y)
+print('Creating a single tree:')
+result_tree = tree_grow(x, y, 20, 5, 8)
+new_preds = tree_pred(x, result_tree)
 
-result_tree = tree_grow(x.values, y.values, 2, 1, 4)
-print(result_tree)
+# # print(result_tree)
+# # print(new_preds)
+calc_metrics(y, new_preds)
+create_confusion_matrix(y, new_preds)
 
-new_preds = tree_pred(x.values, result_tree)
-print(new_preds)
+print('\nCreating a forest of 5 trees:')
+result_trees = tree_grow_b(x, y, 20, 5, 8, 5)
+new_preds_b = tree_pred_b(x, result_trees)
 
-result_trees = tree_grow_b(x.values, y.values, 2, 1, 4, 5)
-print(result_trees)
+# print(result_trees)
+# print(new_preds_b)
+calc_metrics(y, new_preds_b)
+create_confusion_matrix(y, new_preds_b)
 
-new_preds_b = tree_pred_b(x.values, result_trees)
-print(new_preds_b)
+print('\nCreating a Random Forest of 5 trees:')
+result_rf = create_random_forest(x, y, n_trees, 20, 5, 8)
+new_preds_rf = tree_pred_b(x, result_rf)
+calc_metrics(y, new_preds_rf)
+create_confusion_matrix(y, new_preds_rf)
+
+
+
