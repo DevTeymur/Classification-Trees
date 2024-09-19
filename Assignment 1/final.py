@@ -1,7 +1,7 @@
 # Amber Koelfat - 6467296
-# Max Verweij - 
-# Orane Pereira - 
-# Teymur Rzali - 
+# Max Verweij - 6791409
+# Orane Pereira - 7644701
+# Teymur Rzali - 4625471
 
 import pandas as pd
 import numpy as np
@@ -234,7 +234,7 @@ def calc_metrics(y_true, y_pred):
     return accuracy, precision, recall
 
 
-def create_confusion_matrix(y_true, y_pred, display=False):
+def create_confusion_matrix(y_true, y_pred, display=False, title='Confusion Matrix Heatmap'):
     """
     Creates and prints the confusion matrix for the given true and predicted labels. 
     Optionally displays a heatmap visualization of the confusion matrix using seaborn package.
@@ -262,104 +262,66 @@ def create_confusion_matrix(y_true, y_pred, display=False):
         
         plt.xlabel('Predicted')
         plt.ylabel('Actual')
-        plt.title('Confusion Matrix Heatmap')
+        plt.title(title)
         plt.show()
 
 
-def create_random_forest(x, y, n_trees, nmin, minleaf, nfeat):
-    """
-    Creates a random forest by generating multiple decision trees using bootstrap sampling.
+if __name__ == '__main__':
+    # _____________________________________________________________________________________________________
+    # Call of the functions
+    print("__" * 50)
+    print('Credit data tree and forest construction')
+    credit_data = pd.read_csv('credit_data.csv')
+    x = credit_data.drop('class', axis=1).values
+    y = credit_data['class'].values
+    nmin, minleaf, nfeat, m = 2, 1, 5, 5
+    n_trees = 5
 
-    Args:
-        x (numpy.ndarray): Feature matrix (rows of data).
-        y (numpy.ndarray): Target labels.
-        n_trees (int): Number of trees to create in the random forest.
-        nmin (int): Minimum number of samples required to consider a split.
-        minleaf (int): Minimum number of samples required to be at a leaf node.
-        nfeat (int): Number of features to consider when looking for the best split.
+    print('Creating a single tree:')
+    result_tree = tree_grow(x, y, nmin, minleaf, nfeat)
+    new_preds = tree_pred(x, result_tree)
 
-    Returns:
-        list: A list of decision trees created from bootstrap samples of the dataset.
-    """
-    trees = []
-    for _ in range(n_trees):
-        # Generating random indices for the bootstrap sample
-        bootstrap_indices = np.random.choice(range(len(y)), size=len(y), replace=True)
-        x_bootstrap, y_bootstrap = x[bootstrap_indices], y[bootstrap_indices]
+    # print(result_tree)
+    # print(new_preds)
+    calc_metrics(y, new_preds)
+    create_confusion_matrix(y, new_preds)
 
-        tree = tree_grow(x_bootstrap, y_bootstrap, nmin, minleaf, nfeat)
-        trees.append(tree)
-    return trees
+    print('\nCreating a forest of 5 trees:')
+    result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
+    new_preds_b = tree_pred_b(x, result_trees)
 
-# _____________________________________________________________________________________________________
-# Call of the functions
-print("__" * 50)
-print('Credit data tree and forest construction')
-credit_data = pd.read_csv('credit_data.csv')
-x = credit_data.drop('class', axis=1).values
-y = credit_data['class'].values
-nmin, minleaf, nfeat, m = 2, 1, 5, 5
-n_trees = 5
+    # print(result_trees)
+    # print(new_preds_b)
+    calc_metrics(y, new_preds_b)
+    create_confusion_matrix(y, new_preds_b)
 
-print('Creating a single tree:')
-result_tree = tree_grow(x, y, nmin, minleaf, nfeat)
-new_preds = tree_pred(x, result_tree)
+    # _____________________________________________________________________________________________________
+    # Testing on pima indians dataset
+    print("__" * 50)
+    print('\nPima Indians dataset tree construction')
+    pima_data = pd.read_csv('pima_indians_data.csv', header=None)
+    columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'class']
+    pima_data.columns = columns
+    nmin, minleaf, nfeat, m = 20, 5, 8, 5
+    n_trees = 5
 
-# print(result_tree)
-# print(new_preds)
-calc_metrics(y, new_preds)
-create_confusion_matrix(y, new_preds)
+    x = pima_data.drop('class', axis=1).values
+    y = pima_data['class'].values
 
-print('\nCreating a forest of 5 trees:')
-result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
-new_preds_b = tree_pred_b(x, result_trees)
+    print('Creating a single tree:')
+    result_tree = tree_grow(x, y, nmin, minleaf, nfeat)
+    new_preds = tree_pred(x, result_tree)
 
-# print(result_trees)
-# print(new_preds_b)
-calc_metrics(y, new_preds_b)
-create_confusion_matrix(y, new_preds_b)
+    # print(result_tree)
+    # print(new_preds)
+    calc_metrics(y, new_preds)
+    create_confusion_matrix(y, new_preds)
 
-print('\nCreating a Random Forest of 5 trees:')
-result_rf = create_random_forest(x, y, n_trees, nmin, minleaf, nfeat)
-new_preds_rf = tree_pred_b(x, result_rf)
+    print('\nCreating a forest of 5 trees:')
+    result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
+    new_preds_b = tree_pred_b(x, result_trees)
 
-calc_metrics(y, new_preds_rf)
-create_confusion_matrix(y, new_preds_rf)
-
-# _____________________________________________________________________________________________________
-# Testing on pima indians dataset
-print("__" * 50)
-print('\nPima Indians dataset tree construction')
-pima_data = pd.read_csv('pima_indians_data.csv', header=None)
-columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'class']
-pima_data.columns = columns
-nmin, minleaf, nfeat, m = 20, 5, 8, 5
-n_trees = 5
-
-x = pima_data.drop('class', axis=1).values
-y = pima_data['class'].values
-
-print('Creating a single tree:')
-result_tree = tree_grow(x, y, nmin, minleaf, nfeat)
-new_preds = tree_pred(x, result_tree)
-
-# print(result_tree)
-# print(new_preds)
-calc_metrics(y, new_preds)
-create_confusion_matrix(y, new_preds)
-
-print('\nCreating a forest of 5 trees:')
-result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
-new_preds_b = tree_pred_b(x, result_trees)
-
-# print(result_trees)
-# print(new_preds_b)
-calc_metrics(y, new_preds_b)
-create_confusion_matrix(y, new_preds_b)
-
-print('\nCreating a Random Forest of 5 trees:')
-result_rf = create_random_forest(x, y, n_trees, nmin, minleaf, nfeat)
-new_preds_rf = tree_pred_b(x, result_rf)
-
-calc_metrics(y, new_preds_rf)
-create_confusion_matrix(y, new_preds_rf)
+    # print(result_trees)
+    # print(new_preds_b)
+    calc_metrics(y, new_preds_b)
+    create_confusion_matrix(y, new_preds_b)
