@@ -39,23 +39,44 @@ def tree_grow(x, y, nmin, minleaf, nfeat):
     """
     n_samples = len(y)
     majority_class = int(np.bincount(y).argmax()) # Finding the most common class in y
+    class_distribution = dict(zip(*np.unique(y, return_counts=True)))
 
     # In both cases, we return a leaf node with the majority class
-    if n_samples < nmin:
-        return {'leaf': True, 'class': majority_class} # Get the majority class and return it
+    if n_samples < nmin or len(np.unique(y)) == 1:
+        return {
+            'leaf': True,
+            'class': majority_class,
+            'samples': n_samples,
+            'class_distribution': class_distribution
+        } # Get the majority class and return it
     if n_samples < minleaf:
-        return {'leaf': True, 'class': majority_class} # Same for here, making a leaf node
+        return {
+            'leaf': True,
+            'class': majority_class,
+            'samples': n_samples,
+            'class_distribution': class_distribution
+        } # Same for here, making a leaf node
     
     best_feat, best_threshold = find_best_split(x, y, nfeat)
     if best_feat is None:
-        return {'leaf': True, 'class': majority_class} # No valid split found, return the majority class as a leaf node
+        return {
+            'leaf': True,
+            'class': majority_class,
+            'samples': n_samples,
+            'class_distribution': class_distribution
+        } # No valid split found, return the majority class as a leaf node
     
     # Splitting the data into two groups based on the found best threshold
     left_indices, right_indices = x[:, best_feat] <= best_threshold, x[:, best_feat] > best_threshold
 
     # Check if either side of the split is empty
     if np.sum(left_indices) == 0 or np.sum(right_indices) == 0:
-        return {'leaf': True, 'class': majority_class} # If empty, stop growing and return majority class
+        return {
+            'leaf': True,
+            'class': majority_class,
+            'samples': n_samples,
+            'class_distribution': class_distribution
+        } # If empty, stop growing and return majority class
     
     # Recursively call tree_grow on the two groups to create the child nodes
     left_child = tree_grow(x[left_indices], y[left_indices], nmin, minleaf, nfeat)
@@ -64,8 +85,10 @@ def tree_grow(x, y, nmin, minleaf, nfeat):
     return {
         'feature': best_feat,
         'threshold': best_threshold,
+        'samples': n_samples,
+        'class_distribution': class_distribution,
         'left': left_child,
-        'right': right_child,
+        'right': right_child
     }
     
 
@@ -268,7 +291,8 @@ def create_confusion_matrix(y_true, y_pred, display=False, title='Confusion Matr
         plt.xlabel('Predicted')
         plt.ylabel('Actual')
         plt.title(title)
-        plt.show()
+        plt.savefig(f'img/{title}.png')
+        # plt.show()
 
 
 def print_first_splits(tree, depth=0, max_depth=2):
@@ -292,6 +316,68 @@ def print_first_splits(tree, depth=0, max_depth=2):
     print_first_splits(tree['right'], depth + 1, max_depth)
 
 
+def get_first_three_splits(tree, selected_features):
+    """
+    Extracts the first three splits from the decision tree (root, left, right) including feature, threshold, 
+    samples, and class distribution.
+
+    Args:
+        tree (dict): The decision tree structure.
+        selected_features (list): List of feature names corresponding to feature indices.
+
+    Returns:
+        dict: A dictionary same with tree structure with the first three splits (root, left, right) including feature, threshold, 
+        samples, and class distribution.
+    """
+    root_split = {
+        "feature": selected_features[tree.get("feature")],
+        "threshold": tree.get("threshold"),
+        "samples": tree.get("samples"),
+        "class_distribution": tree.get("class_distribution")
+    }
+    
+    # Extract left child of the root
+    left_split = tree.get("left")
+    if "leaf" not in left_split:  # Ensure it's not a leaf node
+        left_split = {
+            "feature": selected_features[left_split.get("feature")],
+            "threshold": left_split.get("threshold"),
+            "samples": left_split.get("samples"),
+            "class_distribution": left_split.get("class_distribution")
+        }
+    else:  # If it's a leaf node, we extract leaf node information
+        left_split = {
+            "leaf": True,
+            "class": left_split.get("class"),
+            "samples": left_split.get("samples"),
+            "class_distribution": left_split.get("class_distribution")
+        }
+
+    # Extract right child of the root
+    right_split = tree.get("right")
+    if "leaf" not in right_split:  # Ensure it's not a leaf node
+        right_split = {
+            "feature": selected_features[right_split.get("feature")],
+            "threshold": right_split.get("threshold"),
+            "samples": right_split.get("samples"),
+            "class_distribution": right_split.get("class_distribution")
+        }
+    else:  # If it's a leaf node, we extract leaf node information
+        right_split = {
+            "leaf": True,
+            "class": right_split.get("class"),
+            "samples": right_split.get("samples"),
+            "class_distribution": right_split.get("class_distribution")
+        }
+
+    # Return the first three splits with relevant information
+    return {
+        "root_split": root_split,
+        "left_split": left_split,
+        "right_split": right_split
+    }
+
+
 if __name__ == '__main__':
     # _____________________________________________________________________________________________________
     # Call of the functions
@@ -311,6 +397,9 @@ if __name__ == '__main__':
     # print(new_preds)
     calc_metrics(y, new_preds)
     create_confusion_matrix(y, new_preds)
+    # Example usage
+    
+    exit()
 
     print('\nCreating a forest of 5 trees:')
     result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
