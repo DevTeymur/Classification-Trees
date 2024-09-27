@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.metrics import precision_score, accuracy_score, recall_score, confusion_matrix
 
+np.random.seed(0)
 
 def tree_grow(x, y, nmin, minleaf, nfeat):
     """
@@ -42,22 +43,22 @@ def tree_grow(x, y, nmin, minleaf, nfeat):
     class_distribution = dict(zip(*np.unique(y, return_counts=True)))
 
     # In both cases, we return a leaf node with the majority class
-    if n_samples < nmin or len(np.unique(y)) == 1:
+    if n_samples < nmin:# or len(np.unique(y)) == 1:
         return {
             'leaf': True,
             'class': majority_class,
             'samples': n_samples,
             'class_distribution': class_distribution
         } # Get the majority class and return it
-    if n_samples < minleaf:
-        return {
-            'leaf': True,
-            'class': majority_class,
-            'samples': n_samples,
-            'class_distribution': class_distribution
-        } # Same for here, making a leaf node
+    # if n_samples < minleaf:
+    #     return {
+    #         'leaf': True,
+    #         'class': majority_class,
+    #         'samples': n_samples,
+    #         'class_distribution': class_distribution
+    #     } # Same for here, making a leaf node
     
-    best_feat, best_threshold = find_best_split(x, y, nfeat)
+    best_feat, best_threshold = find_best_split(x, y, minleaf, nfeat)
     if best_feat is None:
         return {
             'leaf': True,
@@ -176,25 +177,7 @@ def tree_pred_b(x, tree_obj_list):
     return final_preds
 
 
-def calc_gini_index(y, logs=False):
-    """
-    A function to calculate the Gini index for a given set of class labels.
-
-    Args:
-        y (numpy.ndarray): Array of class labels.
-        logs (bool, optional): If True, prints details about the Gini index calculation. Defaults to False.
-
-    Returns:
-        float: Gini index, representing the impurity of the set.
-    """
-    len_target = len(y)
-    classes, counts = np.unique(y, return_counts=True)
-    gini_index = 1 - sum([(count/len_target)**2 for count in counts])
-    print(f'Classes: {classes}, Counts: {counts}, Gini Index: {gini_index}') if logs else None
-    return gini_index
-
-
-def find_best_split(x, y, nfeat, logs=False):
+def find_best_split(x, y, minleaf, nfeat, logs=False):
     """
     Finds the best split for the given dataset based on the Gini index.
 
@@ -210,19 +193,24 @@ def find_best_split(x, y, nfeat, logs=False):
     """
     curr_num_features = x.shape[1]
     # Random selection of nfeat features to consider for the split
-    selected_features = random.sample(range(curr_num_features), nfeat)
+    # selected_features = random.sample(range(curr_num_features), nfeat)
+    selected_features = np.random.choice(nfeat, nfeat, replace=False)
     print(f'Selected Features: {selected_features}') if logs else None
 
     best_gini, best_feature, best_threshold = float('inf'), None, None
 
     for feature in selected_features:
         # From the current feature, get the unique values to consider as thresholds
-        thresholds = np.unique(x[:, feature])
+        thresholds = np.sort(np.unique(x[:, feature]))  # Sort thresholds to ensure consistency
+
         for threshold in thresholds:
             left_indices, right_indices = x[:, feature] <= threshold, x[:, feature] > threshold # Splitting
             
-            # Check if either side of the split is empty
+            # # Check if either side of the split is empty
             if np.sum(left_indices) == 0 or np.sum(right_indices) == 0:
+                continue
+
+            if np.sum(left_indices) < minleaf or np.sum(right_indices) < minleaf:
                 continue
             
             # Left, right gini calculation and based on the calculated values weighted gini is calculated
@@ -239,6 +227,24 @@ def find_best_split(x, y, nfeat, logs=False):
 
     print(f'Best Gini: {round(best_gini, 2)}, Best Feature: {best_feature}, Best Threshold: {best_threshold}') if logs else None
     return best_feature, int(best_threshold)
+
+
+def calc_gini_index(y, logs=False):
+    """
+    A function to calculate the Gini index for a given set of class labels.
+
+    Args:
+        y (numpy.ndarray): Array of class labels.
+        logs (bool, optional): If True, prints details about the Gini index calculation. Defaults to False.
+
+    Returns:
+        float: Gini index, representing the impurity of the set.
+    """
+    len_target = len(y)
+    classes, counts = np.unique(y, return_counts=True)
+    gini_index = 1 - sum([(count/len_target)**2 for count in counts])
+    print(f'Classes: {classes}, Counts: {counts}, Gini Index: {gini_index}') if logs else None
+    return gini_index
 
 
 
@@ -326,7 +332,7 @@ def get_first_three_splits(tree, selected_features):
         selected_features (list): List of feature names corresponding to feature indices.
 
     Returns:
-        dict: A dictionary same with tree structure with the first three splits (root, left, right) including feature, threshold, 
+        dict: A dictionary with the first three splits (root, left, right) including feature, threshold, 
         samples, and class distribution.
     """
     root_split = {
@@ -376,6 +382,118 @@ def get_first_three_splits(tree, selected_features):
         "left_split": left_split,
         "right_split": right_split
     }
+
+def print_splits_new(tree, depth=0, max_depth=3):
+    """
+    Recursively prints the splits of a decision tree in a readable format.
+
+    Args:
+        tree (dict): The decision tree to traverse.
+        depth (int): The current depth (default is 0).
+        max_depth (int): The maximum depth to print (default is 3).
+    """
+    # If we've reached a leaf node or exceeded the max depth, stop
+    if 'leaf' in tree or depth >= max_depth:
+        return
+
+    # Print the current split (feature and threshold) with indentation based on depth
+    indent = "  " * depth  # Indentation for readability
+    print(f"{indent}Depth {depth}: Split on feature '{tree['feature']}' at threshold {tree['threshold']}. "
+          f"Samples: {tree['samples']}, Class Distribution: {tree['class_distribution']}")
+    
+    # Recursively print for the left and right child nodes
+    print_splits_new(tree['left'], depth + 1, max_depth)
+    print_splits_new(tree['right'], depth + 1, max_depth)
+
+
+def get_first_three_levels_new(tree, selected_features):
+    """
+    Extracts the first three levels from the decision tree including root, its left and right children,
+    and their respective children.
+
+    Args:
+        tree (dict): The decision tree structure.
+        selected_features (list): List of feature names corresponding to feature indices.
+
+    Returns:
+        dict: A dictionary with the first three levels (root, left child, right child, their children) 
+              including feature, threshold, samples, and class distribution.
+    """
+    if tree is None:
+        return None
+
+    # Extract root level
+    root_split = {
+        "feature": selected_features[tree.get("feature")],
+        "threshold": tree.get("threshold"),
+        "samples": tree.get("samples"),
+        "class_distribution": tree.get("class_distribution"),
+        "left": None,
+        "right": None
+    }
+
+    # Extract left child
+    left_child = tree.get("left")
+    if left_child is not None:
+        root_split["left"] = {
+            "feature": selected_features[left_child.get("feature")],
+            "threshold": left_child.get("threshold"),
+            "samples": left_child.get("samples"),
+            "class_distribution": left_child.get("class_distribution"),
+            "left": None,
+            "right": None
+        }
+
+        # Extract left child's children
+        left_left_child = left_child.get("left")
+        left_right_child = left_child.get("right")
+        if left_left_child is not None:
+            root_split["left"]["left"] = {
+                "feature": selected_features[left_left_child.get("feature")],
+                "threshold": left_left_child.get("threshold"),
+                "samples": left_left_child.get("samples"),
+                "class_distribution": left_left_child.get("class_distribution"),
+            }
+        if left_right_child is not None:
+            root_split["left"]["right"] = {
+                "feature": selected_features[left_right_child.get("feature")],
+                "threshold": left_right_child.get("threshold"),
+                "samples": left_right_child.get("samples"),
+                "class_distribution": left_right_child.get("class_distribution"),
+            }
+
+    # Extract right child
+    right_child = tree.get("right")
+    if right_child is not None:
+        root_split["right"] = {
+            "feature": selected_features[right_child.get("feature")],
+            "threshold": right_child.get("threshold"),
+            "samples": right_child.get("samples"),
+            "class_distribution": right_child.get("class_distribution"),
+            "left": None,
+            "right": None
+        }
+
+        # Extract right child's children
+        right_left_child = right_child.get("left")
+        right_right_child = right_child.get("right")
+        if right_left_child is not None:
+            root_split["right"]["left"] = {
+                "feature": selected_features[right_left_child.get("feature")],
+                "threshold": right_left_child.get("threshold"),
+                "samples": right_left_child.get("samples"),
+                "class_distribution": right_left_child.get("class_distribution"),
+            }
+        if right_right_child is not None:
+            root_split["right"]["right"] = {
+                "feature": selected_features[right_right_child.get("feature")],
+                "threshold": right_right_child.get("threshold"),
+                "samples": right_right_child.get("samples"),
+                "class_distribution": right_right_child.get("class_distribution"),
+            }
+
+    # Return the structure for the first three levels
+    return root_split
 
 
 if __name__ == '__main__':

@@ -11,7 +11,6 @@ eclipse_data_2 = pd.read_csv("eclipse-metrics-packages-2.0.csv",sep=';')
 eclipse_data_3 = pd.read_csv("eclipse-metrics-packages-3.0.csv",sep=';')
 
 selected_features = [
- 'post',
  'pre',
  'ACD_avg',
  'ACD_max',
@@ -52,7 +51,9 @@ selected_features = [
  'TLOC_sum',
  'VG_avg',
  'VG_max',
- 'VG_sum']
+ 'VG_sum',
+ 'post',
+ ]
 
 # Selecting the relevant features
 training_data = eclipse_data_2[selected_features]
@@ -68,7 +69,6 @@ test_data['class_label'] = (test_data['post'] > 0).astype(int)
 x_test = test_data.drop(['class_label','post'], axis=1).values
 y_test = test_data['class_label'].values
 
-
 print('Creating a single tree:')
 result_tree = tree_grow(X_train, y_train, nmin=15, minleaf=5, nfeat=41)
 y_pred = tree_pred(x_test, result_tree)
@@ -77,17 +77,18 @@ acc, prec, recall = calc_metrics(y_test, y_pred)
 create_confusion_matrix(y_test, y_pred, display=True, title='Single Tree Confusion Matrix')
 
 # Example usage
-# first_three_splits = get_first_three_splits(result_tree, selected_features)
-# print(first_three_splits)
+first_three_splits = get_first_three_levels_new(result_tree, selected_features)
+print(first_three_splits)
+# print('_____'*10)
 # print(result_tree)
 
-# print('_____'*10)
-# print('Bagging results:')
-# result_trees_b = tree_grow_b(X_train, y_train, nmin=15, minleaf=5, nfeat=41, m=100)
-# y_pred_b = tree_pred_b(x_test, result_trees_b)
+print('_____'*10)
+print('Bagging results:')
+result_trees_b = tree_grow_b(X_train, y_train, nmin=15, minleaf=5, nfeat=41, m=100)
+y_pred_b = tree_pred_b(x_test, result_trees_b)
 
-# acc, prec, recall = calc_metrics(y_test, y_pred_b)
-# create_confusion_matrix(y_test, y_pred_b, display=False, title='Bagging Confusion Matrix')
+acc, prec, recall = calc_metrics(y_test, y_pred_b)
+create_confusion_matrix(y_test, y_pred_b, display=True, title='Bagging Confusion Matrix')
 
 print('_____'*10)
 print('Creating random forest:')
@@ -98,7 +99,6 @@ acc, prec, recall = calc_metrics(y_test, y_pred_rf)
 create_confusion_matrix(y_test, y_pred_rf, display=True, title='Random Forest Confusion Matrix')
 
 
-exit()
 # _____________________________________________________________________________
 # McNemar's Test - not completed
 
@@ -115,24 +115,16 @@ def compute_confusion_components(y_true, y_pred):
     return a, b, c, d
 
 # Confusion components for Tree vs. Bagging
-a_tree_bagging, b_tree_bagging, c_tree_bagging, d_tree_bagging = compute_confusion_components(y_test, y_pred), compute_confusion_components(y_test, y_pred_b)
-
-# Confusion components for Tree vs. Random Forest
-a_tree_rf, b_tree_rf, c_tree_rf, d_tree_rf = compute_confusion_components(y_test, y_pred), compute_confusion_components(y_test, y_pred_rf)
-
-# Confusion components for Bagging vs. Random Forest
-a_bagging_rf, b_bagging_rf, c_bagging_rf, d_bagging_rf = compute_confusion_components(y_test, y_pred_b), compute_confusion_components(y_test, y_pred_rf)
-
-
-
-# Confusion components for Tree vs. Bagging
 a_tree_bagging, b_tree_bagging, c_tree_bagging, d_tree_bagging = compute_confusion_components(y_test, y_pred)
+a_bagging_bagging, b_bagging_bagging, c_bagging_bagging, d_bagging_bagging = compute_confusion_components(y_test, y_pred_b)
 
 # Confusion components for Tree vs. Random Forest
 a_tree_rf, b_tree_rf, c_tree_rf, d_tree_rf = compute_confusion_components(y_test, y_pred)
+a_rf_rf, b_rf_rf, c_rf_rf, d_rf_rf = compute_confusion_components(y_test, y_pred_rf)
 
 # Confusion components for Bagging vs. Random Forest
 a_bagging_rf, b_bagging_rf, c_bagging_rf, d_bagging_rf = compute_confusion_components(y_test, y_pred_b)
+a_rf_bagging, b_rf_bagging, c_rf_bagging, d_rf_bagging = compute_confusion_components(y_test, y_pred_rf)
 
 # Create contingency tables
 contingency_tree_bagging = [[a_tree_bagging, b_tree_bagging],
