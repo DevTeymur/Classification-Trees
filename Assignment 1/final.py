@@ -226,9 +226,11 @@ def calc_metrics(y_true, y_pred):
         tuple: A tuple containing accuracy, precision, and recall, each rounded to 2 decimal places.
     """
 
-    accuracy = round(accuracy_score(y_true, y_pred), 2)
-    precision = round(precision_score(y_true, y_pred, average='binary'), 2)
-    recall = round(recall_score(y_true, y_pred, average='binary'), 2)
+    round_by = 5
+
+    accuracy = round(accuracy_score(y_true, y_pred), round_by)
+    precision = round(precision_score(y_true, y_pred, average='binary'), round_by)
+    recall = round(recall_score(y_true, y_pred, average='binary'), round_by)
     
     print(f'Accuracy = {accuracy}, Precision = {precision}, Recall = {recall}')    
     return accuracy, precision, recall
