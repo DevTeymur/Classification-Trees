@@ -4,7 +4,6 @@
 # Teymur Rzali - 4625471
 
 import scipy
-import random
 import numpy as np
 import pandas as pd
 
@@ -188,7 +187,7 @@ def find_best_split(x, y, minleaf, nfeat, logs=False):
         logs (bool, optional): If True, prints the selected features and details about the best split. Defaults to False.
 
     Returns:
-        tuple: The best feature index and best threshold value for the split.
+        tuple: The best feature index arnd best threshold value for the split.
                If no valid split is found, returns (None, None).
     """
     curr_num_features = x.shape[1]
@@ -301,89 +300,7 @@ def create_confusion_matrix(y_true, y_pred, display=False, title='Confusion Matr
         # plt.show()
 
 
-def print_first_splits(tree, depth=0, max_depth=2):
-    """
-    Recursively prints the first three splits of a decision tree.
-
-    Args:
-        tree (dict): The decision tree to traverse.
-        depth (int): The current depth (default is 0).
-        max_depth (int): The maximum depth to print (default is 2).
-    """
-    # If we've reached a leaf node or exceeded the max depth, stop
-    if 'leaf' in tree or depth > max_depth:
-        return
-    
-    # Print the current split (feature and threshold)
-    print(f"Depth {depth}: Split on feature {tree['feature']} at threshold {tree['threshold']}")
-    
-    # Recursively print for the left and right child nodes
-    print_first_splits(tree['left'], depth + 1, max_depth)
-    print_first_splits(tree['right'], depth + 1, max_depth)
-
-
-def get_first_three_splits(tree, selected_features):
-    """
-    Extracts the first three splits from the decision tree (root, left, right) including feature, threshold, 
-    samples, and class distribution.
-
-    Args:
-        tree (dict): The decision tree structure.
-        selected_features (list): List of feature names corresponding to feature indices.
-
-    Returns:
-        dict: A dictionary with the first three splits (root, left, right) including feature, threshold, 
-        samples, and class distribution.
-    """
-    root_split = {
-        "feature": selected_features[tree.get("feature")],
-        "threshold": tree.get("threshold"),
-        "samples": tree.get("samples"),
-        "class_distribution": tree.get("class_distribution")
-    }
-    
-    # Extract left child of the root
-    left_split = tree.get("left")
-    if "leaf" not in left_split:  # Ensure it's not a leaf node
-        left_split = {
-            "feature": selected_features[left_split.get("feature")],
-            "threshold": left_split.get("threshold"),
-            "samples": left_split.get("samples"),
-            "class_distribution": left_split.get("class_distribution")
-        }
-    else:  # If it's a leaf node, we extract leaf node information
-        left_split = {
-            "leaf": True,
-            "class": left_split.get("class"),
-            "samples": left_split.get("samples"),
-            "class_distribution": left_split.get("class_distribution")
-        }
-
-    # Extract right child of the root
-    right_split = tree.get("right")
-    if "leaf" not in right_split:  # Ensure it's not a leaf node
-        right_split = {
-            "feature": selected_features[right_split.get("feature")],
-            "threshold": right_split.get("threshold"),
-            "samples": right_split.get("samples"),
-            "class_distribution": right_split.get("class_distribution")
-        }
-    else:  # If it's a leaf node, we extract leaf node information
-        right_split = {
-            "leaf": True,
-            "class": right_split.get("class"),
-            "samples": right_split.get("samples"),
-            "class_distribution": right_split.get("class_distribution")
-        }
-
-    # Return the first three splits with relevant information
-    return {
-        "root_split": root_split,
-        "left_split": left_split,
-        "right_split": right_split
-    }
-
-def print_splits_new(tree, depth=0, max_depth=3):
+def print_splits(tree, depth=0, max_depth=3):
     """
     Recursively prints the splits of a decision tree in a readable format.
 
@@ -402,11 +319,11 @@ def print_splits_new(tree, depth=0, max_depth=3):
           f"Samples: {tree['samples']}, Class Distribution: {tree['class_distribution']}")
     
     # Recursively print for the left and right child nodes
-    print_splits_new(tree['left'], depth + 1, max_depth)
-    print_splits_new(tree['right'], depth + 1, max_depth)
+    print_splits(tree['left'], depth + 1, max_depth)
+    print_splits(tree['right'], depth + 1, max_depth)
 
 
-def get_first_three_levels_new(tree, selected_features):
+def get_first_three_levels(tree, selected_features):
     """
     Extracts the first three levels from the decision tree including root, its left and right children,
     and their respective children.
@@ -517,7 +434,6 @@ if __name__ == '__main__':
     create_confusion_matrix(y, new_preds)
     # Example usage
     
-    exit()
 
     print('\nCreating a forest of 5 trees:')
     result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
@@ -527,7 +443,7 @@ if __name__ == '__main__':
     # print(new_preds_b)
     calc_metrics(y, new_preds_b)
     create_confusion_matrix(y, new_preds_b)
-    print_first_splits(result_tree)
+    # print_first_splits(result_tree)
 
     # _____________________________________________________________________________________________________
     # Testing on pima indians dataset

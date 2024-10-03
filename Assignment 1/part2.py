@@ -77,7 +77,7 @@ acc, prec, recall = calc_metrics(y_test, y_pred)
 create_confusion_matrix(y_test, y_pred, display=True, title='Single Tree Confusion Matrix')
 
 # Example usage
-first_three_splits = get_first_three_levels_new(result_tree, selected_features)
+first_three_splits = get_first_three_levels(result_tree, selected_features)
 print(first_three_splits)
 # print('_____'*10)
 # print(result_tree)
@@ -105,38 +105,11 @@ create_confusion_matrix(y_test, y_pred_rf, display=True, title='Random Forest Co
 from sklearn.metrics import confusion_matrix
 from statsmodels.stats.contingency_tables import mcnemar
 
-# Function to compute confusion matrix components for McNemar's test
-def compute_confusion_components(y_true, y_pred):
-    conf_matrix = confusion_matrix(y_true, y_pred)
-    a = conf_matrix[0, 0]  # True Negatives
-    b = conf_matrix[0, 1]  # False Positives
-    c = conf_matrix[1, 0]  # False Negatives
-    d = conf_matrix[1, 1]  # True Positives
-    return a, b, c, d
+contingency_tree_bagging = confusion_matrix(y_pred, y_pred_b)
+contingency_tree_rf = confusion_matrix(y_pred, y_pred_rf)
+contingency_bagging_rf = confusion_matrix(y_pred_b, y_pred_rf)
 
-# Confusion components for Tree vs. Bagging
-a_tree_bagging, b_tree_bagging, c_tree_bagging, d_tree_bagging = compute_confusion_components(y_test, y_pred)
-a_bagging_bagging, b_bagging_bagging, c_bagging_bagging, d_bagging_bagging = compute_confusion_components(y_test, y_pred_b)
-
-# Confusion components for Tree vs. Random Forest
-a_tree_rf, b_tree_rf, c_tree_rf, d_tree_rf = compute_confusion_components(y_test, y_pred)
-a_rf_rf, b_rf_rf, c_rf_rf, d_rf_rf = compute_confusion_components(y_test, y_pred_rf)
-
-# Confusion components for Bagging vs. Random Forest
-a_bagging_rf, b_bagging_rf, c_bagging_rf, d_bagging_rf = compute_confusion_components(y_test, y_pred_b)
-a_rf_bagging, b_rf_bagging, c_rf_bagging, d_rf_bagging = compute_confusion_components(y_test, y_pred_rf)
-
-# Create contingency tables
-contingency_tree_bagging = [[a_tree_bagging, b_tree_bagging],
-                             [c_tree_bagging, d_tree_bagging]]
-
-contingency_tree_rf = [[a_tree_rf, b_tree_rf],
-                       [c_tree_rf, d_tree_rf]]
-
-contingency_bagging_rf = [[a_bagging_rf, b_bagging_rf],
-                          [c_bagging_rf, d_bagging_rf]]
-
-# Run McNemar's test
+# McNemar Test
 result_tree_bagging = mcnemar(contingency_tree_bagging, exact=True)
 result_tree_rf = mcnemar(contingency_tree_rf, exact=True)
 result_bagging_rf = mcnemar(contingency_bagging_rf, exact=True)
