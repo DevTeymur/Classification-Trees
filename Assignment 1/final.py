@@ -49,13 +49,6 @@ def tree_grow(x, y, nmin, minleaf, nfeat):
             'samples': n_samples,
             'class_distribution': class_distribution
         } # Get the majority class and return it
-    # if n_samples < minleaf:
-    #     return {
-    #         'leaf': True,
-    #         'class': majority_class,
-    #         'samples': n_samples,
-    #         'class_distribution': class_distribution
-    #     } # Same for here, making a leaf node
     
     best_feat, best_threshold = find_best_split(x, y, minleaf, nfeat)
     if best_feat is None:
@@ -193,7 +186,7 @@ def find_best_split(x, y, minleaf, nfeat, logs=False):
     curr_num_features = x.shape[1]
     # Random selection of nfeat features to consider for the split
     # selected_features = random.sample(range(curr_num_features), nfeat)
-    selected_features = np.random.choice(nfeat, nfeat, replace=False)
+    selected_features = np.random.choice(curr_num_features, nfeat, replace=False)
     print(f'Selected Features: {selected_features}') if logs else None
 
     best_gini, best_feature, best_threshold = float('inf'), None, None
@@ -244,7 +237,6 @@ def calc_gini_index(y, logs=False):
     gini_index = 1 - sum([(count/len_target)**2 for count in counts])
     print(f'Classes: {classes}, Counts: {counts}, Gini Index: {gini_index}') if logs else None
     return gini_index
-
 
 
 def calc_metrics(y_true, y_pred):
@@ -308,6 +300,9 @@ def print_splits(tree, depth=0, max_depth=3):
         tree (dict): The decision tree to traverse.
         depth (int): The current depth (default is 0).
         max_depth (int): The maximum depth to print (default is 3).
+
+    Returns:
+        None: This function does not return any value, but it prints the splits of the decision tree.
     """
     # If we've reached a leaf node or exceeded the max depth, stop
     if 'leaf' in tree or depth >= max_depth:
@@ -412,10 +407,8 @@ def get_first_three_levels(tree, selected_features):
     # Return the structure for the first three levels
     return root_split
 
-
+# Call of the functions
 if __name__ == '__main__':
-    # _____________________________________________________________________________________________________
-    # Call of the functions
     print("__" * 50)
     print('Credit data tree and forest construction')
     credit_data = pd.read_csv('credit_data.csv')
@@ -432,8 +425,6 @@ if __name__ == '__main__':
     # print(new_preds)
     calc_metrics(y, new_preds)
     create_confusion_matrix(y, new_preds)
-    # Example usage
-    
 
     print('\nCreating a forest of 5 trees:')
     result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
