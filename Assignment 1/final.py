@@ -427,7 +427,7 @@ if __name__ == '__main__':
     print(new_preds)
     calc_metrics(y, new_preds)
     create_confusion_matrix(y, new_preds)
-    exit()
+
     print('\nCreating a forest of 5 trees:')
     result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
     new_preds_b = tree_pred_b(x, result_trees)
@@ -459,7 +459,6 @@ if __name__ == '__main__':
     print(new_preds)
     calc_metrics(y, new_preds)
     create_confusion_matrix(y, new_preds)
-    exit()
 
     print('\nCreating a forest of 5 trees:')
     result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
