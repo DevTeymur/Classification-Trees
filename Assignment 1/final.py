@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.metrics import precision_score, accuracy_score, recall_score, confusion_matrix
 
-np.random.seed(0)
+np.random.seed(42)
 
 def tree_grow(x, y, nmin, minleaf, nfeat):
     """
@@ -194,11 +194,13 @@ def find_best_split(x, y, minleaf, nfeat, logs=False):
     for feature in selected_features:
         # From the current feature, get the unique values to consider as thresholds
         thresholds = np.sort(np.unique(x[:, feature]))  # Sort thresholds to ensure consistency
+        print(f'Feature: {feature}, Thresholds: {thresholds}') if logs else None
 
-        for threshold in thresholds:
+        for i in range(1, len(thresholds)):
+            threshold = (thresholds[i] + thresholds[i - 1]) / 2
             left_indices, right_indices = x[:, feature] <= threshold, x[:, feature] > threshold # Splitting
             
-            # # Check if either side of the split is empty
+            # Check if either side of the split is empty
             if np.sum(left_indices) == 0 or np.sum(right_indices) == 0:
                 continue
 
@@ -218,7 +220,7 @@ def find_best_split(x, y, minleaf, nfeat, logs=False):
         return None, None
 
     print(f'Best Gini: {round(best_gini, 2)}, Best Feature: {best_feature}, Best Threshold: {best_threshold}') if logs else None
-    return best_feature, int(best_threshold)
+    return best_feature, float(best_threshold)
 
 
 def calc_gini_index(y, logs=False):
@@ -421,11 +423,11 @@ if __name__ == '__main__':
     result_tree = tree_grow(x, y, nmin, minleaf, nfeat)
     new_preds = tree_pred(x, result_tree)
 
-    # print(result_tree)
-    # print(new_preds)
+    print(result_tree)
+    print(new_preds)
     calc_metrics(y, new_preds)
     create_confusion_matrix(y, new_preds)
-
+    exit()
     print('\nCreating a forest of 5 trees:')
     result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
     new_preds_b = tree_pred_b(x, result_trees)
@@ -453,10 +455,11 @@ if __name__ == '__main__':
     result_tree = tree_grow(x, y, nmin, minleaf, nfeat)
     new_preds = tree_pred(x, result_tree)
 
-    # print(result_tree)
-    # print(new_preds)
+    print(result_tree)
+    print(new_preds)
     calc_metrics(y, new_preds)
     create_confusion_matrix(y, new_preds)
+    exit()
 
     print('\nCreating a forest of 5 trees:')
     result_trees = tree_grow_b(x, y, nmin, minleaf, nfeat, m)
