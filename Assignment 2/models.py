@@ -65,6 +65,29 @@ def naive_bayes(X_train, y_train, X_test, y_test, n_features=1000, type='uigram'
         'recall': recall,
         'f1_score': f1,
     }
+
+    # Feature importance based on log probabilities
+    feature_log_prob = final_model.feature_log_prob_  # Log probabilities of features
+    feature_names = vectorizer.get_feature_names_out()
+
+    # Difference in log probability between the two classes
+    feature_importance = feature_log_prob[1, :] - feature_log_prob[0, :]
+
+    # Get top 10 features for fake reviews (class 1) and genuine reviews (class 0)
+    top_fake_indices = feature_importance.argsort()[-10:][::-1]
+    top_genuine_indices = feature_importance.argsort()[:10]
+
+    top_fake_features = [(feature_names[i], feature_importance[i]) for i in top_fake_indices]
+    top_genuine_features = [(feature_names[i], feature_importance[i]) for i in top_genuine_indices]
+
+    print("\nTop 10 features indicating fake reviews:")
+    for feature, score in top_fake_features:
+        print(f'{feature}: {score:.4f}')
+
+    print("\nTop 10 features indicating genuine reviews:")
+    for feature, score in top_genuine_features:
+        print(f'{feature}: {score:.4f}')
+
     return metrics
 
 
@@ -230,9 +253,25 @@ def random_forest_model(X_train, y_train, X_test, y_test, n_features=1000, param
 
 naive_bayes_unigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='unigram')
 naive_bayes_bigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='bigram')
+exit()
 logistic_reg_unigram_results = logistic_reg(X_train, y_train, X_test, y_test, type='unigram')
 logistic_reg_bigram_results = logistic_reg(X_train, y_train, X_test, y_test, type='bigram')
 cls_tree_unigram_results = classification_tree(X_train, y_train, X_test, y_test, type='unigram')
 cls_tree_bigram_results = classification_tree(X_train, y_train, X_test, y_test, type='bigram')
 rf_unigram_results = random_forest_model(X_train, y_train, X_test, y_test, type='unigram')
 rf_bigram_results = random_forest_model(X_train, y_train, X_test, y_test, type='bigram')
+
+# Gather all results in csv file
+results = {
+    'Naive Bayes Unigram': naive_bayes_unigram_results,
+    'Naive Bayes Bigram': naive_bayes_bigram_results,
+    'Logistic Regression Unigram': logistic_reg_unigram_results,
+    'Logistic Regression Bigram': logistic_reg_bigram_results,
+    'Classification Tree Unigram': cls_tree_unigram_results,
+    'Classification Tree Bigram': cls_tree_bigram_results,
+    'Random Forest Unigram': rf_unigram_results,
+    'Random Forest Bigram': rf_bigram_results,
+}
+
+results_df = pd.DataFrame(results).T
+results_df.to_csv('data/results.csv')
