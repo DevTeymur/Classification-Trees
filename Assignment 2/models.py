@@ -21,19 +21,38 @@ X_test = X[640:]   # Last 160 reviews for testing
 y_test = y[640:]
 
 
-def naive_bayes(X_train, y_train, X_test, y_test, n_features=1000, type='uigram'):
-    print('_____'*20)
+def remove_sparse_terms(X, threshold=0.05):
+    # Calculate the occurrence of each feature across all samples
+    feature_counts = X.sum(axis=0).A1  # Convert to 1D array
+    total_samples = X.shape[0]
+    
+    # Keep features that occur in at least 5% of the samples
+    mask = feature_counts >= (threshold * total_samples)
+    return X[:, mask], mask
+
+
+def naive_bayes(X_train, y_train, X_test, y_test, n_features=100, type='unigram', remove_sparse=True):
+    print('_____' * 20)
     print(f'Naive Bayes {type} Model')
-    # Vectorization unigram
-    vectorizer = CountVectorizer(ngram_range=(1, 2))  if type == 'bigram' else CountVectorizer()
+
+    # Vectorization
+    vectorizer = CountVectorizer(ngram_range=(1, 2)) if type == 'bigram' else CountVectorizer()
     X_train_vectorized = vectorizer.fit_transform(X_train)
     X_test_vectorized = vectorizer.transform(X_test)
+    
+    if remove_sparse:
+        print('Removing sparse terms...')
+        X_train_filtered, mask = remove_sparse_terms(X_train_vectorized)
+        X_test_filtered = X_test_vectorized[:, mask]  # Filter test data using the same mask
+    else:
+        X_train_filtered = X_train_vectorized
+        X_test_filtered = X_test_vectorized
 
     # Feature Selection using SelectKBest
-    # Selecting the top 1000 features based on chi-squared test
+    # Selecting the top n_features based on chi-squared test
     feature_selector = SelectKBest(chi2, k=n_features)
-    X_train_selected = feature_selector.fit_transform(X_train_vectorized, y_train)
-    X_test_selected = feature_selector.transform(X_test_vectorized)
+    X_train_selected = feature_selector.fit_transform(X_train_filtered, y_train)
+    X_test_selected = feature_selector.transform(X_test_filtered)
 
     # Hyperparameter tuning using cross-validation
     nb_model = MultinomialNB()
@@ -59,6 +78,7 @@ def naive_bayes(X_train, y_train, X_test, y_test, n_features=1000, type='uigram'
     recall = recall_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred)
     print(f'Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, F1 Score: {f1:.4f}')
+    
     metrics = {
         'accuracy': accuracy,
         'precision': precision,
@@ -251,9 +271,8 @@ def random_forest_model(X_train, y_train, X_test, y_test, n_features=1000, param
     }
     return metrics
 
-naive_bayes_unigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='unigram')
-naive_bayes_bigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='bigram')
-exit()
+naive_bayes_unigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='unigram', remove_sparse=False)
+naive_bayes_bigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='bigram', remove_sparse=False)
 logistic_reg_unigram_results = logistic_reg(X_train, y_train, X_test, y_test, type='unigram')
 logistic_reg_bigram_results = logistic_reg(X_train, y_train, X_test, y_test, type='bigram')
 cls_tree_unigram_results = classification_tree(X_train, y_train, X_test, y_test, type='unigram')
