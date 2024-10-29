@@ -1,0 +1,275 @@
+tima@Timas-MacBook-Pro Assignment 2 % python3 models.py
+____________________________________________________________________________________________________
+Naive Bayes unigram Model
+Fitting 10 folds for each of 50 candidates, totalling 500 fits
+Best alpha: 3.5
+Accuracy: 0.8250, Precision: 0.8354, Recall: 0.8148, F1 Score: 0.8250
+
+Top 10 features indicating fake reviews:
+accommodated: 2.0554
+acquainted: 1.9782
+across: 1.7723
+additional: 1.7135
+adamant: 1.6792
+account: 1.6792
+adequately: 1.6611
+activity: 1.6510
+abutting: 1.6053
+adhering: 1.5923
+
+Top 10 features indicating genuine reviews:
+accounting: -1.8386
+accurate: -1.7297
+added: -1.6579
+adjacent: -1.5063
+accurately: -1.3252
+activities: -1.2585
+accomedations: -1.2459
+aaa: -1.2459
+accountable: -1.2459
+accomidations: -1.1871
+____________________________________________________________________________________________________
+Naive Bayes unigram Model
+Removing sparse terms...
+Fitting 10 folds for each of 50 candidates, totalling 500 fits
+Best alpha: 0.6000000000000001
+Accuracy: 0.8063, Precision: 0.8049, Recall: 0.8148, F1 Score: 0.8098
+
+Top 10 features indicating fake reviews:
+accomadations: 2.7379
+addressed: 1.9707
+adds: 1.9405
+accept: 1.8357
+acknowledged: 1.6922
+adjoined: 1.5115
+ac: 1.4895
+addition: 1.4868
+accidentally: 1.3904
+abysmal: 1.3549
+
+Top 10 features indicating genuine reviews:
+accurately: -2.3801
+accounting: -2.2577
+adamant: -2.0023
+adhering: -1.9933
+add: -1.3872
+acted: -1.3056
+adjective: -1.2874
+adapter: -1.2801
+address: -1.2518
+accepting: -1.2501
+____________________________________________________________________________________________________
+Naive Bayes bigram Model
+Fitting 10 folds for each of 50 candidates, totalling 500 fits
+Best alpha: 2.6
+Accuracy: 0.8250, Precision: 0.8193, Recall: 0.8395, F1 Score: 0.8293
+
+Top 10 features indicating fake reviews:
+abutting: 2.3929
+absolutely horrible: 2.2904
+able rest: 2.2670
+absolutely horrifying: 2.0124
+absolutly terrible: 2.0124
+absolutely reporting: 1.9462
+aback phone: 1.9462
+ability: 1.9462
+ability fully: 1.9462
+absolutely stay: 1.9153
+
+Top 10 features indicating genuine reviews:
+absent hotel: -1.9418
+able create: -1.8965
+absent: -1.8923
+absolute terror: -1.8256
+able help: -1.7410
+absolutely worth: -1.6947
+absolutely want: -1.6917
+abysmal lack: -1.5711
+absolute worse: -1.5711
+absolute worst: -1.5237
+____________________________________________________________________________________________________
+Naive Bayes bigram Model
+Removing sparse terms...
+Fitting 10 folds for each of 50 candidates, totalling 500 fits
+Best alpha: 5.0
+Accuracy: 0.8000, Precision: 0.7952, Recall: 0.8148, F1 Score: 0.8049
+
+Top 10 features indicating fake reviews:
+able pull: 1.8902
+absurd: 1.5849
+absurd like: 1.5069
+able give: 1.4642
+absolute worst: 1.4307
+absolutely worth: 1.2972
+able gain: 1.2484
+abysmal lack: 1.2445
+abruptness: 1.2371
+able moved: 1.1794
+
+Top 10 features indicating genuine reviews:
+absence: -1.6473
+absolute: -1.4931
+absolutely save: -1.4878
+abutting: -1.3055
+abound gripe: -1.2895
+absolutely horrifying: -1.1306
+absolutely horrible: -1.0626
+able: -1.0542
+absolutely reporting: -1.0432
+able look: -1.0113
+____________________________________________________________________________________________________
+Logistic Regression unigram Model
+Best C: 50
+Accuracy: 0.8063, Precision: 0.7907, Recall: 0.8395, F1 Score: 0.8144
+____________________________________________________________________________________________________
+Logistic Regression bigram Model
+Best C: 20
+Accuracy: 0.8187, Precision: 0.8421, Recall: 0.7901, F1 Score: 0.8153
+____________________________________________________________________________________________________
+Classification Tree unigram Model
+Best parameters: {'max_depth': 5, 'min_samples_split': 2}
+Accuracy: 0.6813, Precision: 0.6923, Recall: 0.6667, F1 Score: 0.6792
+____________________________________________________________________________________________________
+Classification Tree bigram Model
+Best parameters: {'max_depth': 5, 'min_samples_split': 5}
+Accuracy: 0.6813, Precision: 0.6786, Recall: 0.7037, F1 Score: 0.6909
+____________________________________________________________________________________________________
+Random Forests unigram Model
+zsh: segmentation fault  python3 models.py
+tima@Timas-MacBook-Pro Assignment 2 % python3 models.py
+____________________________________________________________________________________________________
+Naive Bayes unigram Model
+Fitting 10 folds for each of 50 candidates, totalling 500 fits
+Best alpha: 3.5
+Accuracy: 0.8250, Precision: 0.8354, Recall: 0.8148, F1 Score: 0.8250
+
+Top 10 features indicating fake reviews:
+accommodated: 2.0554
+acquainted: 1.9782
+across: 1.7723
+additional: 1.7135
+adamant: 1.6792
+account: 1.6792
+adequately: 1.6611
+activity: 1.6510
+abutting: 1.6053
+adhering: 1.5923
+
+Top 10 features indicating genuine reviews:
+accounting: -1.8386
+accurate: -1.7297
+added: -1.6579
+adjacent: -1.5063
+accurately: -1.3252
+activities: -1.2585
+accomedations: -1.2459
+aaa: -1.2459
+accountable: -1.2459
+accomidations: -1.1871
+____________________________________________________________________________________________________
+Naive Bayes unigram Model
+Removing sparse terms...
+Fitting 10 folds for each of 50 candidates, totalling 500 fits
+Best alpha: 0.6000000000000001
+Accuracy: 0.8063, Precision: 0.8049, Recall: 0.8148, F1 Score: 0.8098
+
+Top 10 features indicating fake reviews:
+accomadations: 2.7379
+addressed: 1.9707
+adds: 1.9405
+accept: 1.8357
+acknowledged: 1.6922
+adjoined: 1.5115
+ac: 1.4895
+addition: 1.4868
+accidentally: 1.3904
+abysmal: 1.3549
+
+Top 10 features indicating genuine reviews:
+accurately: -2.3801
+accounting: -2.2577
+adamant: -2.0023
+adhering: -1.9933
+add: -1.3872
+acted: -1.3056
+adjective: -1.2874
+adapter: -1.2801
+address: -1.2518
+accepting: -1.2501
+____________________________________________________________________________________________________
+Naive Bayes bigram Model
+Fitting 10 folds for each of 50 candidates, totalling 500 fits
+Best alpha: 2.6
+Accuracy: 0.8250, Precision: 0.8193, Recall: 0.8395, F1 Score: 0.8293
+
+Top 10 features indicating fake reviews:
+abutting: 2.3929
+absolutely horrible: 2.2904
+able rest: 2.2670
+absolutely horrifying: 2.0124
+absolutly terrible: 2.0124
+absolutely reporting: 1.9462
+aback phone: 1.9462
+ability: 1.9462
+ability fully: 1.9462
+absolutely stay: 1.9153
+
+Top 10 features indicating genuine reviews:
+absent hotel: -1.9418
+able create: -1.8965
+absent: -1.8923
+absolute terror: -1.8256
+able help: -1.7410
+absolutely worth: -1.6947
+absolutely want: -1.6917
+abysmal lack: -1.5711
+absolute worse: -1.5711
+absolute worst: -1.5237
+____________________________________________________________________________________________________
+Naive Bayes bigram Model
+Removing sparse terms...
+Fitting 10 folds for each of 50 candidates, totalling 500 fits
+Best alpha: 5.0
+Accuracy: 0.8000, Precision: 0.7952, Recall: 0.8148, F1 Score: 0.8049
+
+Top 10 features indicating fake reviews:
+able pull: 1.8902
+absurd: 1.5849
+absurd like: 1.5069
+able give: 1.4642
+absolute worst: 1.4307
+absolutely worth: 1.2972
+able gain: 1.2484
+abysmal lack: 1.2445
+abruptness: 1.2371
+able moved: 1.1794
+
+Top 10 features indicating genuine reviews:
+absence: -1.6473
+absolute: -1.4931
+absolutely save: -1.4878
+abutting: -1.3055
+abound gripe: -1.2895
+absolutely horrifying: -1.1306
+absolutely horrible: -1.0626
+able: -1.0542
+absolutely reporting: -1.0432
+able look: -1.0113
+____________________________________________________________________________________________________
+Logistic Regression unigram Model
+Best C: 0.5
+Accuracy: 0.8250, Precision: 0.8272, Recall: 0.8272, F1 Score: 0.8272
+____________________________________________________________________________________________________
+Logistic Regression bigram Model
+Best C: 20
+Accuracy: 0.8187, Precision: 0.8333, Recall: 0.8025, F1 Score: 0.8176
+____________________________________________________________________________________________________
+Classification Tree unigram Model
+Best parameters: {'max_depth': 5, 'min_samples_split': 2}
+Accuracy: 0.6813, Precision: 0.6923, Recall: 0.6667, F1 Score: 0.6792
+____________________________________________________________________________________________________
+Classification Tree bigram Model
+Best parameters: {'max_depth': 5, 'min_samples_split': 5}
+Accuracy: 0.6813, Precision: 0.6786, Recall: 0.7037, F1 Score: 0.6909
+____________________________________________________________________________________________________
+Random Forests unigram Model
