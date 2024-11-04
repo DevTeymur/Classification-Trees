@@ -47,7 +47,7 @@ def create_matrix(X_train, X_test, y_train,y_test, type='unigram', remove_sparse
     return X_train_filtered, X_test_filtered, y_train, y_test, vectorizer
 
 
-def naive_bayes(X_train, y_train, X_test, y_test, n_features=100, type='unigram', remove_sparse=True, logs=False):
+def naive_bayes(X_train, y_train, X_test, y_test, n_features=360, type='unigram', remove_sparse=True, logs=False):
     print('_____' * 20)
     print(f'Naive Bayes {type} Model')
 
@@ -296,11 +296,11 @@ run = [1, 0, 0, 0]
 
 if run[0]:
     # Naive Bayes results
-    naive_bayes_unigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='unigram', remove_sparse=False, logs=True)
-    naive_bayes_unigram_results_sp_removed = naive_bayes(X_train, y_train, X_test, y_test, type='unigram', remove_sparse=True, logs=True)
+    # naive_bayes_unigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='unigram', remove_sparse=False, logs=False)
+    naive_bayes_unigram_results_sp_removed = naive_bayes(X_train, y_train, X_test, y_test, type='unigram', remove_sparse=True, logs=False)
 
-    naive_bayes_bigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='bigram', remove_sparse=False, logs=True)
-    naive_bayes_bigram_results_sp_removed = naive_bayes(X_train, y_train, X_test, y_test, type='bigram', remove_sparse=True, logs=True)
+    # naive_bayes_bigram_results = naive_bayes(X_train, y_train, X_test, y_test, type='bigram', remove_sparse=False, logs=False)
+    naive_bayes_bigram_results_sp_removed = naive_bayes(X_train, y_train, X_test, y_test, type='bigram', remove_sparse=True, logs=False)
 
 if run[1]:
     # Logistic Regression results
